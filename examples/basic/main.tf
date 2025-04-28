@@ -15,3 +15,10 @@ module "vpc" {
 
   cidr_block = var.cidr_block
 }
+
+resource "aws_default_security_group" "default" {
+  vpc_id = module.vpc.vpc_id
+
+  ingress = []
+  egress  = []
+}
