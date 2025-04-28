@@ -16,6 +16,7 @@ module "vpc" {
   cidr_block = var.cidr_block
 }
 
+// Fix for Regula FG_R00089: VPC default security group should restrict all traffic [Medium]
 resource "aws_default_security_group" "default" {
   vpc_id = module.vpc.vpc_id
 
