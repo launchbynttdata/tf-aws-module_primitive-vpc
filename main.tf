@@ -25,10 +25,3 @@ resource "aws_vpc" "vpc" {
   assign_generated_ipv6_cidr_block     = var.assign_generated_ipv6_cidr_block
   tags                                 = var.tags
 }
-
-resource "aws_default_security_group" "default" {
-  vpc_id = aws_vpc.vpc.id
-
-  ingress = []
-  egress  = []
-}
