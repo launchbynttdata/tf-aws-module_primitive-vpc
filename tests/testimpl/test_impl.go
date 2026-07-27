@@ -23,7 +23,7 @@ func TestComposableComplete(t *testing.T, ctx types.TestContext) {
 		})
 
 		if err != nil {
-			t.Errorf("Failure during DescribeCacheClusters: %v", err)
+			t.Errorf("Failure during DescribeVpcs: %v", err)
 		}
 
 		assert.Len(t, out.Vpcs, 1, "Expected VPC does not exists!")
@@ -36,7 +36,7 @@ func TestComposableComplete(t *testing.T, ctx types.TestContext) {
 		})
 
 		if err != nil {
-			t.Errorf("Failure during DescribeCacheClusters: %v", err)
+			t.Errorf("Failure during DescribeVpcs: %v", err)
 		}
 
 		assert.Equal(t, "available", string(out.Vpcs[0].State), "VPC is not available!")
@@ -50,7 +50,7 @@ func TestComposableComplete(t *testing.T, ctx types.TestContext) {
 		})
 
 		if err != nil {
-			t.Errorf("Failure during DescribeCacheClusters: %v", err)
+			t.Errorf("Failure during DescribeVpcs: %v", err)
 		}
 
 		assert.Equal(t, vpcCidrBlock, *out.Vpcs[0].CidrBlock, "Expected VPC CIDR Block does not match current VPC CIDR Block!")
@@ -64,8 +64,73 @@ func TestComposableComplete(t *testing.T, ctx types.TestContext) {
 		})
 
 		if err != nil {
-			t.Errorf("Failure during DescribeCacheClusters: %v", err)
+			t.Errorf("Failure during DescribeVpcs: %v", err)
 		}
+
+		found := 0
+
+		for tagk, tagv := range tags {
+			for _, tag2 := range out.Vpcs[0].Tags {
+				if tagk == *tag2.Key && tagv == *tag2.Value {
+					found++
+					break
+				}
+			}
+		}
+
+		assert.GreaterOrEqual(t, found, len(tags), "Expected VPC tags does not match current VPC tags!")
+	})
+}
+
+// TestComposableCompleteReadOnly performs read-only verification against
+// already-deployed infrastructure. It must not create, update, or destroy
+// any resources, and must call describe-style (non-mutating) AWS EC2 API
+// operations only.
+func TestComposableCompleteReadOnly(t *testing.T, ctx types.TestContext) {
+	awsClient := GetAWSEC2Client(t)
+
+	t.Run("TestIsDeployed", func(t *testing.T) {
+		vpcId := terraform.Output(t, ctx.TerratestTerraformOptions(), "vpc_id")
+		out, err := awsClient.DescribeVpcs(context.TODO(), &ec2.DescribeVpcsInput{
+			VpcIds: []string{vpcId},
+		})
+
+		require.NoErrorf(t, err, "Failure during DescribeVpcs: %v", err)
+		require.Len(t, out.Vpcs, 1, "Expected VPC does not exists!")
+	})
+
+	t.Run("TestIsAvailable", func(t *testing.T) {
+		vpcId := terraform.Output(t, ctx.TerratestTerraformOptions(), "vpc_id")
+		out, err := awsClient.DescribeVpcs(context.TODO(), &ec2.DescribeVpcsInput{
+			VpcIds: []string{vpcId},
+		})
+
+		require.NoErrorf(t, err, "Failure during DescribeVpcs: %v", err)
+		require.Len(t, out.Vpcs, 1, "Expected VPC does not exists!")
+		assert.Equal(t, "available", string(out.Vpcs[0].State), "VPC is not available!")
+	})
+
+	t.Run("TestCIDRBlock", func(t *testing.T) {
+		vpcId := terraform.Output(t, ctx.TerratestTerraformOptions(), "vpc_id")
+		vpcCidrBlock := terraform.Output(t, ctx.TerratestTerraformOptions(), "vpc_cidr_block")
+		out, err := awsClient.DescribeVpcs(context.TODO(), &ec2.DescribeVpcsInput{
+			VpcIds: []string{vpcId},
+		})
+
+		require.NoErrorf(t, err, "Failure during DescribeVpcs: %v", err)
+		require.Len(t, out.Vpcs, 1, "Expected VPC does not exists!")
+		assert.Equal(t, vpcCidrBlock, *out.Vpcs[0].CidrBlock, "Expected VPC CIDR Block does not match current VPC CIDR Block!")
+	})
+
+	t.Run("TestTags", func(t *testing.T) {
+		vpcId := terraform.Output(t, ctx.TerratestTerraformOptions(), "vpc_id")
+		tags := terraform.OutputMap(t, ctx.TerratestTerraformOptions(), "vpc_tags")
+		out, err := awsClient.DescribeVpcs(context.TODO(), &ec2.DescribeVpcsInput{
+			VpcIds: []string{vpcId},
+		})
+
+		require.NoErrorf(t, err, "Failure during DescribeVpcs: %v", err)
+		require.Len(t, out.Vpcs, 1, "Expected VPC does not exists!")
 
 		found := 0
 
