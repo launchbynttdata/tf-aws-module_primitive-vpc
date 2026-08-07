@@ -17,7 +17,7 @@ func TestComposableComplete(t *testing.T, ctx types.TestContext) {
 	awsClient := GetAWSEC2Client(t)
 
 	t.Run("TestIsDeployed", func(t *testing.T) {
-		vpcId := terraform.Output(t, ctx.TerratestTerraformOptions(), "vpc_id")
+		vpcId := terraform.OutputContext(t, context.Background(), ctx.TerratestTerraformOptions(), "vpc_id")
 		out, err := awsClient.DescribeVpcs(context.TODO(), &ec2.DescribeVpcsInput{
 			VpcIds: []string{vpcId},
 		})
@@ -30,7 +30,7 @@ func TestComposableComplete(t *testing.T, ctx types.TestContext) {
 	})
 
 	t.Run("TestIsAvailable", func(t *testing.T) {
-		vpcId := terraform.Output(t, ctx.TerratestTerraformOptions(), "vpc_id")
+		vpcId := terraform.OutputContext(t, context.Background(), ctx.TerratestTerraformOptions(), "vpc_id")
 		out, err := awsClient.DescribeVpcs(context.TODO(), &ec2.DescribeVpcsInput{
 			VpcIds: []string{vpcId},
 		})
@@ -43,8 +43,8 @@ func TestComposableComplete(t *testing.T, ctx types.TestContext) {
 	})
 
 	t.Run("TestCIDRBlock", func(t *testing.T) {
-		vpcId := terraform.Output(t, ctx.TerratestTerraformOptions(), "vpc_id")
-		vpcCidrBlock := terraform.Output(t, ctx.TerratestTerraformOptions(), "vpc_cidr_block")
+		vpcId := terraform.OutputContext(t, context.Background(), ctx.TerratestTerraformOptions(), "vpc_id")
+		vpcCidrBlock := terraform.OutputContext(t, context.Background(), ctx.TerratestTerraformOptions(), "vpc_cidr_block")
 		out, err := awsClient.DescribeVpcs(context.TODO(), &ec2.DescribeVpcsInput{
 			VpcIds: []string{vpcId},
 		})
@@ -57,8 +57,8 @@ func TestComposableComplete(t *testing.T, ctx types.TestContext) {
 	})
 
 	t.Run("TestTags", func(t *testing.T) {
-		vpcId := terraform.Output(t, ctx.TerratestTerraformOptions(), "vpc_id")
-		tags := terraform.OutputMap(t, ctx.TerratestTerraformOptions(), "vpc_tags")
+		vpcId := terraform.OutputContext(t, context.Background(), ctx.TerratestTerraformOptions(), "vpc_id")
+		tags := terraform.OutputMapContext(t, context.Background(), ctx.TerratestTerraformOptions(), "vpc_tags")
 		out, err := awsClient.DescribeVpcs(context.TODO(), &ec2.DescribeVpcsInput{
 			VpcIds: []string{vpcId},
 		})
