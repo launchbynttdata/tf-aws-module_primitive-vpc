@@ -34,7 +34,7 @@ variable "ipv4_netmask_length" {
   default     = null
   validation {
     condition     = coalesce(var.ipv4_netmask_length, 1) > 0
-    error_message = "ipv4_netmask_length should be greather than 0"
+    error_message = "The ipv4_netmask_length must be greater than 0."
   }
 }
 
@@ -56,7 +56,7 @@ variable "ipv6_netmask_length" {
   default     = null
   validation {
     condition     = coalesce(var.ipv6_netmask_length, 44) >= 44 && coalesce(var.ipv6_netmask_length, 44) <= 60 && coalesce(var.ipv6_netmask_length, 44) % 4 == 0
-    error_message = "ipv6_netmask_length valid values are from 44 to 60 in increments of 4."
+    error_message = "The ipv6_netmask_length valid values are from 44 to 60 in increments of 4."
   }
 }
 

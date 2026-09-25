@@ -13,7 +13,28 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TestComposableComplete is the functional-test entrypoint. It runs under
+// lib.RunSetupTestTeardown (apply -> assert -> destroy), so the mutating
+// operation under test is the apply/destroy cycle itself; the assertions it
+// delegates to are read-only cloud verification shared with the readonly
+// suite.
 func TestComposableComplete(t *testing.T, ctx types.TestContext) {
+	verifyVpcReadOnly(t, ctx)
+}
+
+// TestComposableCompleteReadOnly is the readonly-test entrypoint. It runs
+// under lib.RunNonDestructiveTest against already-deployed infrastructure
+// and must not create, update, or delete anything -- it shares the same
+// read-only verification as the functional suite, but on its own distinct
+// implementation function per the TestComposable* naming lcaf-component-terratest
+// requires for non-destructive runs.
+func TestComposableCompleteReadOnly(t *testing.T, ctx types.TestContext) {
+	verifyVpcReadOnly(t, ctx)
+}
+
+// verifyVpcReadOnly performs only read-only EC2 SDK calls (DescribeVpcs) and
+// is safe to run against infrastructure that must not be mutated.
+func verifyVpcReadOnly(t *testing.T, ctx types.TestContext) {
 	awsClient := GetAWSEC2Client(t)
 
 	t.Run("TestIsDeployed", func(t *testing.T) {
@@ -23,7 +44,7 @@ func TestComposableComplete(t *testing.T, ctx types.TestContext) {
 		})
 
 		if err != nil {
-			t.Errorf("Failure during DescribeCacheClusters: %v", err)
+			t.Errorf("Failure during DescribeVpcs: %v", err)
 		}
 
 		assert.Len(t, out.Vpcs, 1, "Expected VPC does not exists!")
@@ -36,7 +57,7 @@ func TestComposableComplete(t *testing.T, ctx types.TestContext) {
 		})
 
 		if err != nil {
-			t.Errorf("Failure during DescribeCacheClusters: %v", err)
+			t.Errorf("Failure during DescribeVpcs: %v", err)
 		}
 
 		assert.Equal(t, "available", string(out.Vpcs[0].State), "VPC is not available!")
@@ -50,7 +71,7 @@ func TestComposableComplete(t *testing.T, ctx types.TestContext) {
 		})
 
 		if err != nil {
-			t.Errorf("Failure during DescribeCacheClusters: %v", err)
+			t.Errorf("Failure during DescribeVpcs: %v", err)
 		}
 
 		assert.Equal(t, vpcCidrBlock, *out.Vpcs[0].CidrBlock, "Expected VPC CIDR Block does not match current VPC CIDR Block!")
@@ -64,7 +85,7 @@ func TestComposableComplete(t *testing.T, ctx types.TestContext) {
 		})
 
 		if err != nil {
-			t.Errorf("Failure during DescribeCacheClusters: %v", err)
+			t.Errorf("Failure during DescribeVpcs: %v", err)
 		}
 
 		found := 0
