@@ -25,7 +25,9 @@ const (
 	infraTFVarFileNameDefault        = "test.tfvars"
 )
 
-func TestVpcModule(t *testing.T) {
+// TestVpcModuleReadOnly validates deployed infrastructure without creating,
+// mutating, or destroying Terraform-managed resources.
+func TestVpcModuleReadOnly(t *testing.T) {
 
 	ctx := types.CreateTestContextBuilder().
 		SetTestConfig(&testimpl.ThisTFModuleConfig{}).
@@ -33,5 +35,5 @@ func TestVpcModule(t *testing.T) {
 		SetTestConfigFileName(infraTFVarFileNameDefault).
 		Build()
 
-	lib.RunNonDestructiveTest(t, *ctx, testimpl.TestComposableComplete)
+	lib.RunNonDestructiveTest(t, *ctx, testimpl.TestComposableCompleteReadOnly)
 }
